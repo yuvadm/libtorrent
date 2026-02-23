@@ -224,9 +224,12 @@ SocketManager::transfer_event(Event* event_from, std::function<Event* ()> func) 
 
   if (event_to == nullptr) {
     // Transfer failed, the func is responsible for cleaning up event_from.
+    // Remove the stale socket_map entry since the fd was closed during
+    // the failed transfer.
     LT_LOG("transfer_event() : %s:%s:%i : socket transfer function returned nullptr",
            this_thread::thread()->name(), event_from->type_name(), fd);
 
+    m_socket_map.erase(itr);
     return nullptr;
   }
 

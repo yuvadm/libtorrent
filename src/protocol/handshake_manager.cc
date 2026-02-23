@@ -219,9 +219,15 @@ HandshakeManager::receive_succeeded(Handshake* handshake) {
   auto download      = handshake->download();
   auto peer_type     = handshake->bitfield()->is_all_set() ? "seed" : "leech";
 
+  // Save peer_info and derived values before release_connection() which
+  // sets m_peerInfo to nullptr.
+  auto peer_info     = handshake->peer_info();
+  auto peer_addr_str = sa_addr_str(peer_info->socket_address());
+  auto peer_id_str   = hash_string_to_html_str(peer_info->id());
+
   auto error_func = [&](uint32_t reason) {
-      LT_LOG_SA(handshake->peer_info()->socket_address(), "handshake dropped: type:%s id:%s reason:'%s'",
-                peer_type, hash_string_to_html_str(handshake->peer_info()->id()).c_str(), strerror(reason));
+      lt_log_print(LOG_CONNECTION_HANDSHAKE, "handshake_manager->%s: handshake dropped: type:%s id:%s reason:'%s'",
+                   peer_addr_str.c_str(), peer_type, peer_id_str.c_str(), strerror(reason));
     };
 
   if (!download->info()->is_active()) {
@@ -230,17 +236,14 @@ HandshakeManager::receive_succeeded(Handshake* handshake) {
     return;
   }
 
-  if (!download->connection_list()->want_connection(handshake->peer_info(), handshake->bitfield())) {
+  if (!download->connection_list()->want_connection(peer_info, handshake->bitfield())) {
     error_func(e_handshake_unwanted_connection);
     handshake->destroy_connection();
     return;
   }
 
-  auto peer_info = handshake->peer_info();
-
   auto new_event = runtime::socket_manager()->transfer_event(handshake, [&]() -> Event* {
-      auto fd        = handshake->file_descriptor();
-      auto peer_info = handshake->peer_info();
+      auto fd = handshake->file_descriptor();
 
       handshake->release_connection();
 
@@ -258,8 +261,8 @@ HandshakeManager::receive_succeeded(Handshake* handshake) {
     });
 
   if (new_event == nullptr) {
-    LT_LOG_SA(handshake->peer_info()->socket_address(), "handshake dropped: type:%s id:%s reason:'socket transfer failed'",
-              peer_type, hash_string_to_html_str(handshake->peer_info()->id()).c_str());
+    lt_log_print(LOG_CONNECTION_HANDSHAKE, "handshake_manager->%s: handshake dropped: type:%s id:%s reason:'socket transfer failed'",
+                 peer_addr_str.c_str(), peer_type, peer_id_str.c_str());
     return;
   }
 
@@ -268,8 +271,8 @@ HandshakeManager::receive_succeeded(Handshake* handshake) {
   manager->client_list()->retrieve_id(&peer_info->mutable_client_info(), peer_info->id());
   pcb->peer_chunks()->set_have_timer(handshake->initialized_time());
 
-  LT_LOG_SA(peer_info->socket_address(), "handshake success: type:%s id:%s",
-            peer_type, hash_string_to_html_str(peer_info->id()).c_str());
+  lt_log_print(LOG_CONNECTION_HANDSHAKE, "handshake_manager->%s: handshake success: type:%s id:%s",
+               peer_addr_str.c_str(), peer_type, peer_id_str.c_str());
 
   if (handshake->unread_size() != 0) {
     if (handshake->unread_size() > PeerConnectionBase::ProtocolRead::buffer_size)
