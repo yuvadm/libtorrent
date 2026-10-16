@@ -100,6 +100,7 @@ AC_CONFIG_FILES([
     Makefile
     src/Makefile
     src/torrent/Makefile
+    src/torrent/cacheline.h
     test/Makefile
 ])
 

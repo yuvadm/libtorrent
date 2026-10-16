@@ -179,7 +179,7 @@ libtorrent_other_la_SOURCES = \
 	utils/thread_internal.h \
 	utils/queue_buckets.h
 
-AM_CPPFLAGS = -I$(srcdir) -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_builddir)/src -I$(srcdir) -I$(top_srcdir)
 
 EXTRA_DIST= \
 	net/udns/dnsget.c \

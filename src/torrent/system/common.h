@@ -6,6 +6,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <memory>
+#include <torrent/cacheline.h>
 
 
 using namespace std::chrono_literals;

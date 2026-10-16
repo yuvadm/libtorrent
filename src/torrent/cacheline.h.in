@@ -1,0 +1,7 @@
+#ifndef LIBTORRENT_CACHELINE_H
+#define LIBTORRENT_CACHELINE_H
+
+// Part of the public class layout: consumers must use the library's configured value.
+#define LT_SMP_CACHE_BYTES @LT_SMP_CACHE_BYTES@
+
+#endif

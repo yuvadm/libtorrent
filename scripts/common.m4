@@ -82,6 +82,7 @@ AC_DEFUN([TORRENT_CHECK_POSIX_FADVISE], [
 
 AC_DEFUN([TORRENT_CHECK_CACHELINE], [
   AC_REQUIRE([AC_CANONICAL_HOST])
+  AC_SUBST([LT_SMP_CACHE_BYTES])
   AC_MSG_CHECKING([for target cacheline size])
 
   case "$host_os" in
@@ -101,7 +102,7 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
 
         if test "$torrent_cv_cacheline_size" -gt 0; then
           AC_MSG_RESULT([linux builtin ($torrent_cv_cacheline_size bytes)])
-          AC_DEFINE_UNQUOTED([LT_SMP_CACHE_BYTES], [$torrent_cv_cacheline_size], [System-defined Linux L1 SMP cacheline size.])
+          LT_SMP_CACHE_BYTES=$torrent_cv_cacheline_size
         else
           # Handle scenarios where macro maps to a complex runtime expression or fails
           AC_MSG_RESULT([failed to parse SMP_CACHE_BYTES value])
@@ -112,19 +113,19 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
         case "$host_cpu" in
           x86_64*|amd64*|i386*|i486*|i586*|i686*)
             AC_MSG_RESULT([linux fallback x86 64 bytes])
-            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux x86 hardware.])
+            LT_SMP_CACHE_BYTES=64
             ;;
           arm*|aarch64*|powerpc*|ppc*|s390x*)
             AC_MSG_RESULT([linux fallback enterprise 128 bytes])
-            AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Fallback 128-byte alignment for Linux enterprise hardware.])
+            LT_SMP_CACHE_BYTES=128
             ;;
           riscv32*|riscv64*)
             AC_MSG_RESULT([linux fallback RISC-V 64 bytes])
-            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux RISC-V hardware.])
+            LT_SMP_CACHE_BYTES=64
             ;;
           loongarch32*|loongarch64*)
             AC_MSG_RESULT([linux fallback LoongArch 64 bytes])
-            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux LoongArch hardware.])
+            LT_SMP_CACHE_BYTES=64
             ;;
           *)
             AC_MSG_RESULT([unrecognized CPU arch on Linux header fallback])
@@ -140,12 +141,12 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
         x86_64*|amd64*|i386*|i486*|i586*|i686*)
           # Explicit x86 desktop hardware baseline block
           AC_MSG_RESULT([$host_os ($host_cpu) standard x86 64 bytes])
-          AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Standard 64-byte alignment for stable x86 hardware layout.])
+          LT_SMP_CACHE_BYTES=64
           ;;
         arm*|aarch64*|powerpc*|ppc*|s390x*)
           # Explicit modern enterprise and Apple Silicon hardware baseline block
           AC_MSG_RESULT([$host_os ($host_cpu) stable enterprise 128 bytes])
-          AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Optimized 128-byte alignment for newer high-performance chipsets.])
+          LT_SMP_CACHE_BYTES=128
           ;;
         *)
           # STRICT ENFORCEMENT: Fail the build immediately if the CPU isn't explicitly known

@@ -160,7 +160,7 @@ libtorrent_torrent_la_SOURCES = \
 	torrent.cc \
 	torrent.h
 
-AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/.. -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_builddir)/src -I$(srcdir) -I$(srcdir)/.. -I$(top_srcdir)
 
 libtorrent_torrent_data_includedir = $(includedir)/torrent/data
 libtorrent_torrent_data_include_HEADERS = \
@@ -258,6 +258,8 @@ libtorrent_torrent_utils_include_HEADERS = \
 	utils/uri_parser.h
 
 libtorrent_torrent_includedir = $(includedir)/torrent
+nodist_libtorrent_torrent_include_HEADERS = cacheline.h
+
 libtorrent_torrent_include_HEADERS = \
 	bitfield.h \
 	common.h \
