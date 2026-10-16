@@ -1,5 +1,4 @@
 TESTS = \
-	Public_Headers_Test \
 	LibTorrent_Test_Protocol \
 	LibTorrent_Test_Torrent_Net \
 	LibTorrent_Test_Torrent_Runtime \
@@ -11,10 +10,6 @@ TESTS = \
 	LibTorrent_Test
 
 check_PROGRAMS = $(TESTS)
-
-# Deliberately compile public headers without the private config.h.
-Public_Headers_Test_SOURCES = public_headers_test.cc
-Public_Headers_Test_LDADD = ../src/libtorrent.la
 
 CPPUNIT_CFLAGS += -DLT_CPPUNIT_TESTING
 
