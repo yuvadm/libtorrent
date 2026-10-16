@@ -102,7 +102,7 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
 
         if test "$torrent_cv_cacheline_size" -gt 0; then
           AC_MSG_RESULT([linux builtin ($torrent_cv_cacheline_size bytes)])
-          LT_SMP_CACHE_BYTES=$torrent_cv_cacheline_size
+          AC_DEFINE_UNQUOTED([LT_SMP_CACHE_BYTES], [$torrent_cv_cacheline_size], [System-defined Linux L1 SMP cacheline size.])
         else
           # Handle scenarios where macro maps to a complex runtime expression or fails
           AC_MSG_RESULT([failed to parse SMP_CACHE_BYTES value])
@@ -113,19 +113,19 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
         case "$host_cpu" in
           x86_64*|amd64*|i386*|i486*|i586*|i686*)
             AC_MSG_RESULT([linux fallback x86 64 bytes])
-            LT_SMP_CACHE_BYTES=64
+            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux x86 hardware.])
             ;;
           arm*|aarch64*|powerpc*|ppc*|s390x*)
             AC_MSG_RESULT([linux fallback enterprise 128 bytes])
-            LT_SMP_CACHE_BYTES=128
+            AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Fallback 128-byte alignment for Linux enterprise hardware.])
             ;;
           riscv32*|riscv64*)
             AC_MSG_RESULT([linux fallback RISC-V 64 bytes])
-            LT_SMP_CACHE_BYTES=64
+            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux RISC-V hardware.])
             ;;
           loongarch32*|loongarch64*)
             AC_MSG_RESULT([linux fallback LoongArch 64 bytes])
-            LT_SMP_CACHE_BYTES=64
+            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux LoongArch hardware.])
             ;;
           *)
             AC_MSG_RESULT([unrecognized CPU arch on Linux header fallback])
@@ -141,12 +141,12 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
         x86_64*|amd64*|i386*|i486*|i586*|i686*)
           # Explicit x86 desktop hardware baseline block
           AC_MSG_RESULT([$host_os ($host_cpu) standard x86 64 bytes])
-          LT_SMP_CACHE_BYTES=64
+          AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Standard 64-byte alignment for stable x86 hardware layout.])
           ;;
         arm*|aarch64*|powerpc*|ppc*|s390x*)
           # Explicit modern enterprise and Apple Silicon hardware baseline block
           AC_MSG_RESULT([$host_os ($host_cpu) stable enterprise 128 bytes])
-          LT_SMP_CACHE_BYTES=128
+          AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Optimized 128-byte alignment for newer high-performance chipsets.])
           ;;
         *)
           # STRICT ENFORCEMENT: Fail the build immediately if the CPU isn't explicitly known
@@ -156,6 +156,9 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
       esac
       ;;
   esac
+
+  AC_COMPUTE_INT([LT_SMP_CACHE_BYTES], [LT_SMP_CACHE_BYTES], [],
+    [AC_MSG_FAILURE([Could not compute the configured cacheline size.])])
 ])
 
 
